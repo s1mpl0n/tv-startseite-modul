@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>Startseite</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #14161a; color: #e8e6e1;
+      font-family: "Samsung One", "Helvetica Neue", sans-serif; }
+    .box { height: 100%; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 24px; font-size: 32px; }
+    .klein { font-size: 22px; opacity: .6; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <div id="status">Startseite wird geladen …</div>
+    <div class="klein" id="detail"></div>
+  </div>
+  <script>
+    // Dünner Loader: Die eigentliche Startseite liegt auf dem Homeserver.
+    // Änderungen dort brauchen kein Update dieses Moduls.
+    var ZIEL = "http://192.168.178.20:8095/";
+    var versuch = 0;
+
+    function pruefenUndLaden() {
+      versuch++;
+      var xhr = new XMLHttpRequest();
+      xhr.open("GET", ZIEL + "config.json?t=" + Date.now(), true);
+      xhr.timeout = 4000;
+      xhr.onload = function () {
+        if (xhr.status === 200) { window.location.href = ZIEL; }
+        else { fehler("Server antwortet mit Status " + xhr.status); }
+      };
+      xhr.onerror = function () { fehler("Homeserver nicht erreichbar"); };
+      xhr.ontimeout = function () { fehler("Zeitüberschreitung"); };
+      xhr.send();
+    }
+
+    function fehler(text) {
+      document.getElementById("status").textContent = text;
+      document.getElementById("detail").textContent =
+        "Neuer Versuch in 5 s (Versuch " + versuch + ") – " + ZIEL;
+      setTimeout(pruefenUndLaden, 5000);
+    }
+
+    pruefenUndLaden();
+  </script>
+</body>
+</html>

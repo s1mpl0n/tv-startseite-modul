@@ -1,0 +1,16 @@
+{
+  "name": "tv-startseite",
+  "version": "0.1.0",
+  "description": "Eigene Startseite für den Samsung The Frame – lädt die Seite vom Homeserver",
+  "packageType": "app",
+  "appName": "Startseite",
+  "appPath": "app/index.html",
+  "keys": [
+    "ColorF0Red",
+    "ColorF1Green",
+    "ColorF2Yellow",
+    "ColorF3Blue",
+    "MediaPlayPause"
+  ],
+  "license": "MIT"
+}
