@@ -50,13 +50,45 @@
       img.src = ZIEL + "ping.gif?t=" + Date.now();
     }
 
+    var MAX_VERSUCHE = 6;
+    var wiederholung = null;
+
     function fehler(text) {
       document.getElementById("status").textContent = text;
+      var hinweis = versuch < MAX_VERSUCHE
+        ? "Neuer Versuch in 5 s (" + versuch + "/" + MAX_VERSUCHE + ")"
+        : "Keine weiteren Versuche. OK = erneut versuchen";
       document.getElementById("detail").textContent =
-        "Neuer Versuch in 5 s (Versuch " + versuch + ") – Ziel " + ZIEL +
+        hinweis + " – Zurück = beenden – Ziel " + ZIEL +
         " – Loader läuft auf " + window.location.protocol + "//" + window.location.host;
-      setTimeout(pruefenUndLaden, 5000);
+      if (versuch < MAX_VERSUCHE) {
+        wiederholung = setTimeout(pruefenUndLaden, 5000);
+      }
     }
+
+    function beenden() {
+      clearTimeout(wiederholung);
+      try {
+        if (window.tizen && tizen.application) {
+          tizen.application.getCurrentApplication().exit();
+          return;
+        }
+      } catch (e) { /* Fallback unten */ }
+      if (window.history.length > 1) { window.history.back(); }
+    }
+
+    document.addEventListener("keydown", function (e) {
+      if (e.keyCode === 10009 || e.keyCode === 8 || e.keyCode === 27) {   // Zurück / Backspace / Esc
+        e.preventDefault();
+        beenden();
+      } else if (e.keyCode === 13) {                                      // OK
+        e.preventDefault();
+        clearTimeout(wiederholung);
+        versuch = 0;
+        document.getElementById("status").textContent = "Startseite wird geladen …";
+        pruefenUndLaden();
+      }
+    });
 
     pruefenUndLaden();
   </script>
