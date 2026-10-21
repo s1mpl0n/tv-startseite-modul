@@ -1,6 +1,6 @@
 {
   "name": "tv-startseite",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Eigene Startseite für den Samsung The Frame – lädt die Seite vom Homeserver",
   "packageType": "app",
   "appName": "Startseite",
