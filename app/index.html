@@ -19,27 +19,42 @@
   <script>
     // Dünner Loader: Die eigentliche Startseite liegt auf dem Homeserver.
     // Änderungen dort brauchen kein Update dieses Moduls.
+    //
+    // Erreichbarkeit wird über ein kleines Bild geprüft statt per XHR:
+    // Bilder dürfen von fremder Herkunft geladen werden, XHR braucht dafür
+    // CORS-Header und scheitert sonst still mit "onerror".
     var ZIEL = "http://192.168.178.20:8095/";
     var versuch = 0;
 
     function pruefenUndLaden() {
       versuch++;
-      var xhr = new XMLHttpRequest();
-      xhr.open("GET", ZIEL + "config.json?t=" + Date.now(), true);
-      xhr.timeout = 4000;
-      xhr.onload = function () {
-        if (xhr.status === 200) { window.location.href = ZIEL; }
-        else { fehler("Server antwortet mit Status " + xhr.status); }
+      var fertig = false;
+      var img = new Image();
+      var timer = setTimeout(function () {
+        if (fertig) return;
+        fertig = true;
+        fehler("Zeitüberschreitung beim Homeserver");
+      }, 5000);
+      img.onload = function () {
+        if (fertig) return;
+        fertig = true;
+        clearTimeout(timer);
+        window.location.replace(ZIEL);
       };
-      xhr.onerror = function () { fehler("Homeserver nicht erreichbar"); };
-      xhr.ontimeout = function () { fehler("Zeitüberschreitung"); };
-      xhr.send();
+      img.onerror = function () {
+        if (fertig) return;
+        fertig = true;
+        clearTimeout(timer);
+        fehler("Homeserver nicht erreichbar");
+      };
+      img.src = ZIEL + "ping.gif?t=" + Date.now();
     }
 
     function fehler(text) {
       document.getElementById("status").textContent = text;
       document.getElementById("detail").textContent =
-        "Neuer Versuch in 5 s (Versuch " + versuch + ") – " + ZIEL;
+        "Neuer Versuch in 5 s (Versuch " + versuch + ") – Ziel " + ZIEL +
+        " – Loader läuft auf " + window.location.protocol + "//" + window.location.host;
       setTimeout(pruefenUndLaden, 5000);
     }
 
